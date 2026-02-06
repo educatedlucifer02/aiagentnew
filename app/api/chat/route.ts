@@ -64,20 +64,30 @@ export async function POST(request: NextRequest) {
     console.error('Chat API error:', error);
 
     if (error instanceof Error) {
-      if (error.message.includes('API key')) {
+      // Missing/invalid local configuration
+      if (
+        error.message.includes('NVIDIA_API_KEY') ||
+        error.message.toLowerCase().includes('api key')
+      ) {
         return NextResponse.json(
-          { error: 'Configuration error: API key not configured' },
+          { error: 'Configuration error: NVIDIA_API_KEY not configured' },
           { status: 500 }
         );
       }
 
-      // Forward a more specific error when available
+      // Upstream NVIDIA errors
       if (error.message.startsWith('NVIDIA API error:')) {
         return NextResponse.json(
           { error: error.message },
           { status: 502 }
         );
       }
+
+      // Default: forward message so UI can display actionable info
+      return NextResponse.json(
+        { error: error.message || 'Failed to process chat request' },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(
