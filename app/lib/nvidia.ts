@@ -65,7 +65,9 @@ export class NvidiaClient {
 
       for (const line of lines) {
         if (line.startsWith('data: ')) {
-          const data = line.slice(6);
+          const data = line.slice(6).trim();
+          if (!data) continue;
+
           if (data === '[DONE]') {
             yield { id: 'final', content: '', done: true };
             return;
@@ -99,7 +101,7 @@ export class NvidiaClient {
       id: data.id || `chunk-${Date.now()}`,
       content,
       thinking,
-      done: choice.finish_reason !== null,
+      done: choice.finish_reason != null,
     };
   }
 

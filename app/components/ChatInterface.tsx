@@ -38,6 +38,9 @@ export default function ChatInterface({ initialChat }: ChatInterfaceProps) {
   const handleSendMessage = async (content: string, files?: File[]) => {
     if (!content.trim() && (!files || files.length === 0)) return;
 
+    // Clear previous error banner
+    setError(null);
+
     const userMessage: Message = {
       id: generateId(),
       role: 'user',
@@ -82,7 +85,19 @@ export default function ChatInterface({ initialChat }: ChatInterfaceProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send message');
+        let message = `Request failed (${response.status})`;
+        try {
+          const data = await response.json();
+          if (data?.error) message = data.error;
+        } catch {
+          try {
+            const text = await response.text();
+            if (text) message = text;
+          } catch {
+            // ignore
+          }
+        }
+        throw new Error(message);
       }
 
       const reader = response.body?.getReader();
@@ -91,6 +106,7 @@ export default function ChatInterface({ initialChat }: ChatInterfaceProps) {
       }
 
       const decoder = new TextDecoder();
+      let buffer = '';
       let assistantContent = '';
       let assistantThinking = '';
 
@@ -116,13 +132,30 @@ export default function ChatInterface({ initialChat }: ChatInterfaceProps) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
 
-        for (const line of lines) {
+        for (const rawLine of lines) {
+          const line = rawLine.trim();
+          if (!line) continue;
+
           if (line.startsWith('data: ')) {
+            const payload = line.slice(6).trim();
+            if (!payload) continue;
+
+            // Server-side stream terminator
+            if (payload === '[DONE]') {
+              setUiState(prev => ({
+                ...prev,
+                isTyping: false,
+                isThinking: false,
+              }));
+              return;
+            }
+
             try {
-              const data = JSON.parse(line.slice(6));
+              const data = JSON.parse(payload);
 
               if (data.thinking) {
                 assistantThinking += data.thinking;
@@ -170,6 +203,13 @@ export default function ChatInterface({ initialChat }: ChatInterfaceProps) {
           }
         }
       }
+
+      // If the stream ends unexpectedly, ensure UI unblocks
+      setUiState(prev => ({
+        ...prev,
+        isTyping: false,
+        isThinking: false,
+      }));
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';

@@ -32,9 +32,9 @@ export async function POST(request: NextRequest) {
           try {
             for await (const chunk of stream) {
               const data = JSON.stringify(chunk);
-              controller.enqueue(encoder.encode(`data: ${data}\n`));
+              controller.enqueue(encoder.encode(`data: ${data}\n\n`));
             }
-            controller.enqueue(encoder.encode('data: [DONE]\n'));
+            controller.enqueue(encoder.encode('data: [DONE]\n\n'));
             controller.close();
           } catch (error) {
             console.error('Stream error:', error);
@@ -45,9 +45,10 @@ export async function POST(request: NextRequest) {
 
       return new Response(readable, {
         headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
+          'Content-Type': 'text/event-stream; charset=utf-8',
+          'Cache-Control': 'no-cache, no-transform',
           'Connection': 'keep-alive',
+          'X-Accel-Buffering': 'no',
         },
       });
     } else {
@@ -67,6 +68,14 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           { error: 'Configuration error: API key not configured' },
           { status: 500 }
+        );
+      }
+
+      // Forward a more specific error when available
+      if (error.message.startsWith('NVIDIA API error:')) {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 502 }
         );
       }
     }
