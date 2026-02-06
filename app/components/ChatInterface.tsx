@@ -13,6 +13,8 @@ interface ChatInterfaceProps {
 }
 
 export default function ChatInterface({ initialChat }: ChatInterfaceProps) {
+  const [error, setError] = useState<string | null>(null);
+
   const [uiState, setUiState] = useState<UIState>({
     isTyping: false,
     isThinking: false,
@@ -170,10 +172,28 @@ export default function ChatInterface({ initialChat }: ChatInterfaceProps) {
       }
     } catch (error) {
       console.error('Error sending message:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      setError(errorMessage);
       setUiState(prev => ({
         ...prev,
         isTyping: false,
         isThinking: false,
+      }));
+
+      // Add error message to chat
+      const errorResponse: Message = {
+        id: generateId(),
+        role: 'assistant',
+        content: `I encountered an error: ${errorMessage}. Please check your API configuration and try again.`,
+        timestamp: Date.now(),
+      };
+
+      setUiState(prev => ({
+        ...prev,
+        currentChat: prev.currentChat ? {
+          ...prev.currentChat,
+          messages: [...prev.currentChat.messages, errorResponse],
+        } : null,
       }));
     }
   };
@@ -241,14 +261,41 @@ export default function ChatInterface({ initialChat }: ChatInterfaceProps) {
                 Thinking...
               </div>
             )}
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <a
+              href="/api/health"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Check API health"
+            >
               <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-            </button>
+            </a>
           </div>
         </header>
+
+        {/* Error Banner */}
+        {error && (
+          <div className="bg-red-50 border-b border-red-200 px-6 py-3">
+            <div className="max-w-3xl mx-auto flex items-center justify-between">
+              <div className="flex items-center gap-2 text-red-700">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm">{error}</span>
+              </div>
+              <button
+                onClick={() => setError(null)}
+                className="text-red-500 hover:text-red-700"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-6 py-8">
