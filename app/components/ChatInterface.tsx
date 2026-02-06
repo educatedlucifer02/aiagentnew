@@ -236,7 +236,7 @@ export default function ChatInterface({ initialChat }: ChatInterfaceProps) {
       />
 
       {/* Main Content */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${uiState.sidebarOpen ? 'ml-0' : 'ml-0'}`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${uiState.sidebarOpen ? 'ml-72' : 'ml-0'}`}>
         {/* Header */}
         <header className="h-16 bg-white border-b border-kimi-border flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
@@ -297,22 +297,133 @@ export default function ChatInterface({ initialChat }: ChatInterfaceProps) {
           </div>
         )}
 
+        {/* Expand Sidebar Button (when collapsed) */}
+        {!uiState.sidebarOpen && (
+          <button
+            onClick={toggleSidebar}
+            className="fixed left-4 top-4 z-40 p-2 bg-white border border-kimi-border rounded-lg shadow-card hover:bg-gray-50 transition-colors"
+            title="Expand sidebar"
+          >
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        )}
+
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-6 py-8">
           <div className="max-w-3xl mx-auto">
             {currentMessages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
-                <div className="w-16 h-16 bg-kimi-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                  <svg className="w-8 h-8 text-kimi-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {/* Logo */}
+                <div className="w-20 h-20 bg-gradient-to-br from-kimi-primary to-kimi-secondary rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <h2 className="text-2xl font-semibold text-kimi-text mb-2">
-                  How can I help you today?
+                
+                {/* Title */}
+                <h2 className="text-3xl font-bold text-kimi-text mb-2">
+                  Kimi Agent
                 </h2>
-                <p className="text-kimi-textSecondary max-w-md">
-                  Ask me anything, write code, analyze data, or start a conversation.
-                  I can also run Python code in a sandbox environment.
+                <span className="px-3 py-1 bg-kimi-primary/10 text-kimi-primary text-sm rounded-full mb-6">
+                  Powered by Kimi K2.5
+                </span>
+
+                {/* Description */}
+                <p className="text-kimi-textSecondary max-w-lg mb-8">
+                  A powerful AI assistant powered by Kimi K2.5 with advanced reasoning, 
+                  code execution, and multi-modal capabilities.
+                </p>
+
+                {/* Feature Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mb-8">
+                  <div className="p-4 bg-white rounded-xl border border-kimi-border shadow-card text-left hover:shadow-lg transition-shadow">
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                      </svg>
+                    </div>
+                    <h3 className="font-semibold text-kimi-text mb-1">Code Execution</h3>
+                    <p className="text-sm text-kimi-textSecondary">Write and run Python code directly in the chat</p>
+                  </div>
+
+                  <div className="p-4 bg-white rounded-xl border border-kimi-border shadow-card text-left hover:shadow-lg transition-shadow">
+                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </div>
+                    <h3 className="font-semibold text-kimi-text mb-1">Advanced Reasoning</h3>
+                    <p className="text-sm text-kimi-textSecondary">Deep thinking and problem-solving capabilities</p>
+                  </div>
+
+                  <div className="p-4 bg-white rounded-xl border border-kimi-border shadow-card text-left hover:shadow-lg transition-shadow">
+                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+                      <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                    </div>
+                    <h3 className="font-semibold text-kimi-text mb-1">Natural Conversation</h3>
+                    <p className="text-sm text-kimi-textSecondary">Engage in meaningful, contextual dialogues</p>
+                  </div>
+
+                  <div className="p-4 bg-white rounded-xl border border-kimi-border shadow-card text-left hover:shadow-lg transition-shadow">
+                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+                      <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                      </svg>
+                    </div>
+                    <h3 className="font-semibold text-kimi-text mb-1">File Analysis</h3>
+                    <p className="text-sm text-kimi-textSecondary">Upload and analyze documents and code files</p>
+                  </div>
+                </div>
+
+                {/* Example Prompts */}
+                <div className="w-full max-w-lg text-left">
+                  <p className="text-sm text-kimi-textSecondary mb-3">Try asking me:</p>
+                  <div className="space-y-2">
+                    <button 
+                      onClick={() => {
+                        const inputArea = document.querySelector('textarea');
+                        if (inputArea) {
+                          inputArea.value = 'Write a Python function to calculate Fibonacci numbers';
+                          inputArea.focus();
+                        }
+                      }}
+                      className="w-full text-left px-4 py-3 bg-kimi-surface hover:bg-kimi-border/50 rounded-xl text-sm text-kimi-text transition-colors"
+                    >
+                      "Write a Python function to calculate Fibonacci numbers"
+                    </button>
+                    <button 
+                      onClick={() => {
+                        const inputArea = document.querySelector('textarea');
+                        if (inputArea) {
+                          inputArea.value = 'Analyze this dataset and create a visualization';
+                          inputArea.focus();
+                        }
+                      }}
+                      className="w-full text-left px-4 py-3 bg-kimi-surface hover:bg-kimi-border/50 rounded-xl text-sm text-kimi-text transition-colors"
+                    >
+                      "Analyze this dataset and create a visualization"
+                    </button>
+                    <button 
+                      onClick={() => {
+                        const inputArea = document.querySelector('textarea');
+                        if (inputArea) {
+                          inputArea.value = 'Explain quantum computing in simple terms';
+                          inputArea.focus();
+                        }
+                      }}
+                      className="w-full text-left px-4 py-3 bg-kimi-surface hover:bg-kimi-border/50 rounded-xl text-sm text-kimi-text transition-colors"
+                    >
+                      "Explain quantum computing in simple terms"
+                    </button>
+                  </div>
+                </div>
+
+                <p className="mt-8 text-xs text-gray-400">
+                  Kimi K2.5 can make mistakes. Please verify important information.
                 </p>
               </div>
             ) : (
