@@ -22,12 +22,19 @@ export default function MessageBubble({ message, isLatest }: MessageBubbleProps)
     setTimeout(() => setCopied(false), 2000);
   };
 
+  interface ContentPart {
+    type: 'text' | 'code';
+    content?: string;
+    language?: string;
+    code?: string;
+  }
+
   const renderContent = () => {
     if (!message.content) return null;
 
     // Parse code blocks
     const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
-    const parts = [];
+    const parts: ContentPart[] = [];
     let lastIndex = 0;
     let match;
 
@@ -61,7 +68,7 @@ export default function MessageBubble({ message, isLatest }: MessageBubbleProps)
     }
 
     return parts.map((part, index) => {
-      if (part.type === 'code') {
+      if (part.type === 'code' && part.language && part.code) {
         return (
           <CodeBlock
             key={index}
@@ -70,13 +77,16 @@ export default function MessageBubble({ message, isLatest }: MessageBubbleProps)
           />
         );
       }
-      return (
-        <div
-          key={index}
-          className="prose prose-sm max-w-none"
-          dangerouslySetInnerHTML={{ __html: part.content }}
-        />
-      );
+      if (part.type === 'text' && part.content) {
+        return (
+          <div
+            key={index}
+            className="prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: part.content }}
+          />
+        );
+      }
+      return null;
     });
   };
 
