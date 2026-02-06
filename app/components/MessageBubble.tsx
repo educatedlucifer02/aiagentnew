@@ -72,7 +72,7 @@ export default function MessageBubble({ message, isLatest }: MessageBubbleProps)
         return (
           <CodeBlock
             key={index}
-            language={part.language}
+            language={part.language as string}
             code={part.code}
           />
         );
