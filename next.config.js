@@ -2,10 +2,16 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['cdn.jsdelivr.net', 'huggingface.co'],
-  },
-  experimental: {
-    serverComponentsExternalPackages: ['@anthropic-ai/sdk'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.jsdelivr.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'huggingface.co',
+      },
+    ],
   },
 }
 
